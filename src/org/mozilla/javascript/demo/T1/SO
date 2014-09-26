@@ -1,0 +1,31 @@
+{
+        "weather": {
+            "channels": {
+                "temperature": {
+                    "type": "number",
+                    "unit": "degrees"
+                }
+            }
+        },
+        "fahrenheit": {
+            "channels": {
+                "f": {
+                    "current-value":
+"{$weather.channels.temperature.current-value} * 1.8 + 32",
+                    "type": "number"
+                }
+            }
+        },
+        "aboveSeventy": {
+            "channels": {
+                "temperature": {
+                    "current-value":
+"{$fahrenheit.channels.f.current-value}",
+                    "type": "number"
+                }
+            },
+            "post-filter":
+"{$result.channels.temperature.current-value} > 70"
+        }
+    }
+}

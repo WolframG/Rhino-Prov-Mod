@@ -1,0 +1,19 @@
+{
+    "Variable": [
+        {
+            "name": "a",
+            "value": 1
+        },
+        {
+            "name": "b",
+            "value": 123
+        },
+        {
+            "name": "c",
+            "value": 4
+        }
+    ],
+    "prefilter": "a >b",
+    "postfiler": " b>c",
+    "computation": "a + b"
+}
