@@ -15,17 +15,17 @@ package org.mozilla.javascript.demo;
 		// Build input 
 			// Map: Variables (name) and there value; value come normally from the input SUs
 			HashMap<String, String> inputVar = new HashMap<String, String>();
-			inputVar.put("a", "420");
+			inputVar.put("a", "{\"op1\" : \"hallo\", \"op2\" : 1}");
 			inputVar.put("b", "1");
 			inputVar.put("c", "\"test\"");
 			//inputVar.put(ProvenanceAPI.COMPUTATION, "b = 3; a; a = b + 9; a == b ? c + b : c + a");
-			inputVar.put(ProvenanceAPI.COMPUTATION, "b*2+a");
+			inputVar.put(ProvenanceAPI.COMPUTATION, "b;JSON.stringify(a)");
 			
 			// Map: Variables and the JSON of the SU where the corresponding current-value and provenance data is
 			Map<String, String> mapVarSU = new HashMap<String, String>();
-			mapVarSU.put("a", "{\"provenance\" : {\"entity\" : \"SU-A-ID\", \"source\" : [\"xx-a\"]} }"); 
-			mapVarSU.put("b", "{\"provenance\" : {\"entity\" : \"SU-B-ID\", \"source\" : [\"xx-b\"]} }"); 
-			mapVarSU.put("c", "{\"provenance\" : {\"entity\" : \"SU-C-ID\", \"source\" : [\"xx-c\"]} }");
+			mapVarSU.put("a", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testa\"}}],\"provenance\" : {\"entity\" : \"SU-A-ID\", \"source\" : [\"xx-a\"]} }"); 
+			mapVarSU.put("b", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testb\"}}],\"provenance\" : {\"entity\" : \"SU-B-ID\", \"source\" : [\"xx-b\"]} }"); 
+			mapVarSU.put("c", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testc\"}}],\"provenance\" : {\"entity\" : \"SU-C-ID\", \"source\" : [\"xx-c\"]} }");
 
 
 			// Map: Variables and the JSON of the SU where the corresponding current-value and provenance data is
@@ -42,7 +42,7 @@ package org.mozilla.javascript.demo;
 			//printProvList(provList);
 		// Get provenance information in JSON format
 			//System.out.println("There are: " + provList.size() + " provenance elements gathered");
-			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("", provList, mapVarSU));
+			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("{\"id\":\"1234\",\"owner_id\":\"userid\", \"policy\" : \"so_policy\"}", provList, mapVarSU, "stream1"));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSONNoTree("", provList, mapVarSU));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSON("", provList, mapVarSU, "Resulting-SU-ID"));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSONNoTree("", provList, mapVarSU, "Resulting-SU-ID"));

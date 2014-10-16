@@ -22,6 +22,7 @@ import net.minidev.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 
 /**
@@ -30,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ProvenanceAPI
 {	
-	static String[] PROVENANCE_ENTRIY = {"\"agent\"", "\"type\"", "\"entity\"", "\"activity\"", "\"timestamp\"", "\"accessed\"", "\"onbehalf-of\"", "\"source\""};
+	static String[] PROVENANCE_ENTRIY = {"\"agent\"", "\"type\"", "\"entity\"", "\"activity\"", "\"timestamp\"", "\"accessed\"", "\"onbehalf-of\"", "\"so-stream\"", "\"source\""};
 	public static final String COMPUTATION = "res";
 
 
@@ -128,6 +129,44 @@ public class ProvenanceAPI
 
 
 
+	/**
+         * Returns the owner
+	 * 
+	 * @param securityMetaData  Identity Management data for SO (JSON)
+	 * @return String containing the owner
+	 */
+        private static String getOwner(String SecturityMetaData)
+        {
+                String returnString = "";
+                try{
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode data;
+                        data = mapper.readTree(SecturityMetaData);
+                        JsonNode ownerCollection = data.findValue("owner_id");
+                        returnString = ownerCollection.toString();
+                }catch(Exception e){}
+                return returnString;
+        }
+
+	/**
+         * Returns the id
+	 * 
+	 * @param securityMetaData  Identity Management data for SO (JSON)
+	 * @return String containing the id
+	 */
+        private static String getId(String SecturityMetaData)
+        {
+                String returnString = "";
+                try{
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode data;
+                        data = mapper.readTree(SecturityMetaData);
+                        JsonNode idCollection = data.findValue("id");
+                        returnString = idCollection.toString();
+                }catch(Exception e){}
+                return returnString;
+        }
+
 
 	/**
          * Returns the provenance information in JSON -- Tree No References --
@@ -138,7 +177,35 @@ public class ProvenanceAPI
 	 * @return String containing the provenance data for the new SU
 	 */
 	public static String buildProvenanceJSON(String securityMetaData, List<Provelement> provList, Map<String, String> VarName_SuPath)
+        {
+                return buildProvenanceJSON(securityMetaData, provList, VarName_SuPath, "");
+        }
+
+
+	/**
+         * Returns the provenance information in JSON -- Tree No References --
+	 * 
+	 * @param securityMetaData  Identity Management data for SO (JSON)
+	 * @param provList	 Contains all information gahtered during runtime
+	 * @param VarName_SuPath	 Maping between variable names and SU
+         * @param stream Stream of SO that triggers the new SU
+	 * @return String containing the provenance data for the new SU
+	 */
+	public static String buildProvenanceJSON(String securityMetaData, List<Provelement> provList, Map<String, String> VarName_SuPath, String stream)
 	{
+
+                 ObjectMapper mapper = new ObjectMapper();
+                 ArrayNode policyJSONs = new ArrayNode(mapper.getNodeFactory());
+                 ObjectMapper mapper2 = new ObjectMapper();
+                 ArrayNode sourceJSONs = new ArrayNode(mapper2.getNodeFactory());
+                // Generate time stamp
+		Date date= new Date();
+		long time = date.getTime();
+                // Get SO_owner
+                String so_owner = getOwner(securityMetaData);
+                String so_id = getId(securityMetaData);
+                
+
                 // Check the flag if provenance collection is on
                 boolean profOn;
                 try{
@@ -147,25 +214,30 @@ public class ProvenanceAPI
                 if (profOn == false){return "";}
 
 		// Generate JSON data
+                String policy = "\"policy\":"; // filed later with the policies of the input SUs
+                String payment = "\"payment\": false";
+
+
+
 		
 		// Agent
 		String agent = PROVENANCE_ENTRIY[0] + " : \"SO\",\n";
 		// Type
 		String type = PROVENANCE_ENTRIY[1] + " : \"sensor_update\",\n";
 		// Entity
-		String entity = PROVENANCE_ENTRIY[2] + " : \"\" ,\n";
+		String entity = PROVENANCE_ENTRIY[2] + " : " + so_id + " ,\n";
 		// Activity
 		String activity = PROVENANCE_ENTRIY[3] + " : " + buildActivityString(provList) + ",\n"; //" : derived_from,\n";
 		// Timestamp
-		Date date= new Date();
-		long time = date.getTime();
 		String timestamp = PROVENANCE_ENTRIY[4] + " : " + time + ",\n";
 		// Accessed
 		String accessed = PROVENANCE_ENTRIY[5] + " :  [],\n";
 		// Onbehalf_of
-		String onbehalf = PROVENANCE_ENTRIY[6] + " : " + "\"default.user.1234\"" + ",\n"; //TODO replace acording to the securityMetaData
+		String onbehalf = PROVENANCE_ENTRIY[6] + " : " + ""+ so_owner + "" + ",\n";
+                // Stream
+                String so_stream = PROVENANCE_ENTRIY[7] + ":" + "\"" + stream + "\"" + ",\n"; 
 		// Source
-		String source = PROVENANCE_ENTRIY[7] + " : [\n";
+		String source = PROVENANCE_ENTRIY[8] + " : \n";
 			//Find out which provenance data has to be copied into the new SU
 			Set<String> usedSU = new TreeSet<String>();
 			for(Provelement currentVars : provList)
@@ -194,6 +266,7 @@ public class ProvenanceAPI
 					}
 					usedSU.add(tempW);
 				}*/
+                          
 				for(String read : currentVars.readVars)
 				{
 					String tempR = "";
@@ -209,22 +282,58 @@ public class ProvenanceAPI
 					//String tempR =  VarName_SuPath.get(read);
 					if (tempR != null && usedSU.contains(tempR) == false )
 					{
-						String tempString = "";
-						tempString = addSourceJSON(tempR);
-						if (tempString.equals("") == false)
+						//String tempString = "";
+                                                JsonNode currentPolicy = getSourcePolicyJSON(tempR);
+                                                JsonNode currentSource = getSourceProvenanceJSON(tempR);
+						//tempString = addSourceJSON(tempR);   // Gets provenance of the input SU
+						if (currentSource != null) //tempString.equals("") == false)
 						{
-							if (usedSU.size()> 0) {
-								tempString = "," +  tempString;}
-								source += tempString;
+							//if (usedSU.size()> 1) {
+							//	tempString = "," +  tempString;}
+							//	source += tempString;
+                                                        sourceJSONs.add(currentSource);
+						}
+						if (currentPolicy != null)
+						{
+                                                        policyJSONs.add(currentPolicy);
 						}
 						usedSU.add(tempR);
 					}
 				}
 			}
-			source += "]\n";
-		
-		return "{\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + source + "}}";
+                        // Add SO policy to the policies for the new SU
+                        JsonNode soPolicy = getSourcePolicyJSON(securityMetaData);
+                        if (soPolicy != null) {
+                                policyJSONs.add(soPolicy);
+                        }
+
+			source += sourceJSONs + "\n";
+                        policy += policyJSONs;
+		                                
+		return "{" + policy + "," + payment + "," + "\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + so_stream + source + "}}";
 	}
+
+
+
+
+/** 
+ * 
+ * @param SU in JSON format 
+ * @return JsonNode that contains the provenance information 
+ */
+	public static JsonNode getSourceProvenanceJSON(String su) 
+	{
+                String returnString = "";
+                JsonNode provCollection = null;                
+                try{
+                ObjectMapper mapper = new ObjectMapper();
+		JsonNode data;
+		data = mapper.readTree(su);
+                provCollection = data.findValue("provenance");        
+                }catch(Exception e){}
+		return provCollection;
+        }
+
 
 
 /** 
@@ -244,6 +353,26 @@ public class ProvenanceAPI
         
                 }catch(Exception e){}
 		return returnString;
+        }
+
+
+
+/** 
+ * 
+ * @param SU in JSON format 
+ * @return JsonNode that contains the provenance information 
+ */
+	public static JsonNode getSourcePolicyJSON(String su) 
+	{
+                String returnString = "";
+                JsonNode provCollection = null;                
+                try{
+                        ObjectMapper mapper = new ObjectMapper();
+		        JsonNode data;
+		        data = mapper.readTree(su);
+                        provCollection = data.findValue("policy");
+                }catch(Exception e){}
+		return provCollection;
         }
 	
 
