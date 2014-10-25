@@ -211,96 +211,106 @@ public class ProvenanceAPI
                 try{
                         profOn = provenanceCollection(securityMetaData);
                 }catch(Exception e){profOn = true;}
-                if (profOn == false){return "";}
 
 		// Generate JSON data
                 String policy = "\"policy\":"; // filed later with the policies of the input SUs
                 String payment = "\"payment\": false";
 
+		        // Agent
+		        String agent = PROVENANCE_ENTRIY[0] + " : \"SO\",\n";
+		        // Type
+		        String type = PROVENANCE_ENTRIY[1] + " : \"sensor_update\",\n";
+		        // Entity
+		        String entity = PROVENANCE_ENTRIY[2] + " : " + so_id + " ,\n";
+		        // Activity
+		        String activity = PROVENANCE_ENTRIY[3] + " : " + buildActivityString(provList) + ",\n"; //" : derived_from,\n";
+		        // Timestamp
+		        String timestamp = PROVENANCE_ENTRIY[4] + " : " + time + ",\n";
+		        // Accessed
+		        String accessed = PROVENANCE_ENTRIY[5] + " :  [],\n";
+		        // Onbehalf_of
+		        String onbehalf = PROVENANCE_ENTRIY[6] + " : " + ""+ so_owner + "" + ",\n";
+                        // Stream
+                        String so_stream = PROVENANCE_ENTRIY[7] + ":" + "\"" + stream + "\"" + ",\n"; 
+		        // Source
+		        String source = PROVENANCE_ENTRIY[8] + " : \n";
 
+	        if (profOn == true){	
 
-		
-		// Agent
-		String agent = PROVENANCE_ENTRIY[0] + " : \"SO\",\n";
-		// Type
-		String type = PROVENANCE_ENTRIY[1] + " : \"sensor_update\",\n";
-		// Entity
-		String entity = PROVENANCE_ENTRIY[2] + " : " + so_id + " ,\n";
-		// Activity
-		String activity = PROVENANCE_ENTRIY[3] + " : " + buildActivityString(provList) + ",\n"; //" : derived_from,\n";
-		// Timestamp
-		String timestamp = PROVENANCE_ENTRIY[4] + " : " + time + ",\n";
-		// Accessed
-		String accessed = PROVENANCE_ENTRIY[5] + " :  [],\n";
-		// Onbehalf_of
-		String onbehalf = PROVENANCE_ENTRIY[6] + " : " + ""+ so_owner + "" + ",\n";
-                // Stream
-                String so_stream = PROVENANCE_ENTRIY[7] + ":" + "\"" + stream + "\"" + ",\n"; 
-		// Source
-		String source = PROVENANCE_ENTRIY[8] + " : \n";
-			//Find out which provenance data has to be copied into the new SU
-			Set<String> usedSU = new TreeSet<String>();
-			for(Provelement currentVars : provList)
-			{
-			// Add provenance data for all written variables
-				/*String tempW = "";
-				for (Map.Entry<String, String> entry : VarName_SuPath.entrySet())
-				{
-					//if ((getValideVarName(entry.getKey())).equals(currentVars.writeVar)) // Add this code if no JavaScript compliant variable name is passed
-					if ((entry.getKey()).equals(currentVars.writeVar))
-					{
-						tempW = entry.getValue();
-						break;
-					}						
-				}
-				//String tempW = VarName_SuPath.get(currentVars.writeVar);
-				if (tempW != null && usedSU.contains(tempW) == false )
-				{
-					String tempString = "";
-					if (tempW.equals("return")){continue;}
-					tempString = addSource(tempW);
-					if (tempString.equals("") == false)
-					{
-						if (usedSU.size()>= 1) {tempString = ","  + tempString;}
-						source += tempString;
-					}
-					usedSU.add(tempW);
-				}*/
-                          
-				for(String read : currentVars.readVars)
-				{
-					String tempR = "";
-					for (Map.Entry<String, String> entry : VarName_SuPath.entrySet())
-					{
-						//if ((getValideVarName(entry.getKey())).equals(read))	// Add this code if no JavaScript compliant variable name is passed				
-						if ((entry.getKey()).equals(read))
-						{
-							tempR = entry.getValue();
-							break;
-						}						
-					}
-					//String tempR =  VarName_SuPath.get(read);
-					if (tempR != null && usedSU.contains(tempR) == false )
-					{
-						//String tempString = "";
-                                                JsonNode currentPolicy = getSourcePolicyJSON(tempR);
-                                                JsonNode currentSource = getSourceProvenanceJSON(tempR);
-						//tempString = addSourceJSON(tempR);   // Gets provenance of the input SU
-						if (currentSource != null) //tempString.equals("") == false)
-						{
-							//if (usedSU.size()> 1) {
-							//	tempString = "," +  tempString;}
-							//	source += tempString;
-                                                        sourceJSONs.add(currentSource);
-						}
-						if (currentPolicy != null)
-						{
-                                                        policyJSONs.add(currentPolicy);
-						}
-						usedSU.add(tempR);
-					}
-				}
-			}
+			        //Find out which provenance data has to be copied into the new SU
+			        Set<String> usedSU = new TreeSet<String>();
+			        for(Provelement currentVars : provList)
+			        {
+			        // Add provenance data for all written variables
+				        /*String tempW = "";
+				        for (Map.Entry<String, String> entry : VarName_SuPath.entrySet())
+				        {
+					        //if ((getValideVarName(entry.getKey())).equals(currentVars.writeVar)) // Add this code if no JavaScript compliant variable name is passed
+					        if ((entry.getKey()).equals(currentVars.writeVar))
+					        {
+						        tempW = entry.getValue();
+						        break;
+					        }						
+				        }
+				        //String tempW = VarName_SuPath.get(currentVars.writeVar);
+				        if (tempW != null && usedSU.contains(tempW) == false )
+				        {
+					        String tempString = "";
+					        if (tempW.equals("return")){continue;}
+					        tempString = addSource(tempW);
+					        if (tempString.equals("") == false)
+					        {
+						        if (usedSU.size()>= 1) {tempString = ","  + tempString;}
+						        source += tempString;
+					        }
+					        usedSU.add(tempW);
+				        }*/
+                                  
+				        for(String read : currentVars.readVars)
+				        {
+					        String tempR = "";
+					        for (Map.Entry<String, String> entry : VarName_SuPath.entrySet())
+					        {
+						        //if ((getValideVarName(entry.getKey())).equals(read))	// Add this code if no JavaScript compliant variable name is passed				
+						        if ((entry.getKey()).equals(read))
+						        {
+							        tempR = entry.getValue();
+							        break;
+						        }						
+					        }
+					        //String tempR =  VarName_SuPath.get(read);
+					        if (tempR != null && usedSU.contains(tempR) == false )
+					        {
+						        //String tempString = "";
+                                                        JsonNode currentPolicy = getSourcePolicyJSON(tempR);
+                                                        JsonNode currentSource = getSourceProvenanceJSON(tempR);
+						        //tempString = addSourceJSON(tempR);   // Gets provenance of the input SU
+						        if (currentSource != null) //tempString.equals("") == false)
+						        {
+							        //if (usedSU.size()> 1) {
+							        //	tempString = "," +  tempString;}
+							        //	source += tempString;
+                                                                sourceJSONs.add(currentSource);
+						        }
+						        if (currentPolicy != null)
+						        {
+                                                                policyJSONs.add(currentPolicy);
+						        }
+						        usedSU.add(tempR);
+					        }
+				        }
+			        }
+                        }
+                        else { // Provenance flag false 
+                                // Add policies of SUs
+                                String tempR = "";
+                                for (Map.Entry<String, String> entry : VarName_SuPath.entrySet())
+                                {
+					tempR = entry.getValue();
+                                        JsonNode currentPolicy = getSourcePolicyJSON(tempR);
+                                        policyJSONs.add(currentPolicy);
+                                }
+                        }
                         // Add SO policy to the policies for the new SU
                         JsonNode soPolicy = getSourcePolicyJSON(securityMetaData);
                         if (soPolicy != null) {
@@ -309,8 +319,16 @@ public class ProvenanceAPI
 
 			source += sourceJSONs + "\n";
                         policy += policyJSONs;
+                        String ret  = "";
+                        if (profOn == true){	
+                                ret = "{" + policy + "," + payment + "," + "\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + so_stream + source + "}}";
+                        }
+                        else
+                        {
+                                ret = "{" + policy + "," + payment + "}";
+                        }
 		                                
-		return "{" + policy + "," + payment + "," + "\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + so_stream + source + "}}";
+		return ret;
 	}
 
 
@@ -826,5 +844,6 @@ public class ProvenanceAPI
 
 
 }
+
 
 

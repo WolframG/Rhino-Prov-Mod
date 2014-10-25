@@ -35,14 +35,14 @@ package org.mozilla.javascript.demo;
 			String fullComputationString = ProvenanceAPI.buildString(inputVar);
 			System.out.println("Computation String: " + fullComputationString);
 		// Execute String with the modified Rhino version 
-			List<Provelement> provList = (List<Provelement>)ProvenanceAPI.executeSOcode(fullComputationString, "{\"data_provenance_collection\" : true}");
+			List<Provelement> provList = (List<Provelement>)ProvenanceAPI.executeSOcode(fullComputationString, "{\"data_provenance_collection\" : false}");
 		// Get the result value of the computation
 			System.out.println("The result is: " + ProvenanceAPI.getResultValue(provList));
 		// Print gathered data (only for illustration purposes)
 			//printProvList(provList);
 		// Get provenance information in JSON format
 			//System.out.println("There are: " + provList.size() + " provenance elements gathered");
-			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("{\"id\":\"1234\",\"owner_id\":\"userid\", \"policy\" : \"so_policy\"}", provList, mapVarSU, "stream1"));
+			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("{\"id\":\"1234\",\"data_provenance_collection\": false,\"owner_id\":\"userid\", \"policy\" : \"so_policy\"}", provList, mapVarSU, "stream1"));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSONNoTree("", provList, mapVarSU));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSON("", provList, mapVarSU, "Resulting-SU-ID"));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSONNoTree("", provList, mapVarSU, "Resulting-SU-ID"));
