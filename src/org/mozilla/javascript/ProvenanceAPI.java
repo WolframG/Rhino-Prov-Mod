@@ -324,7 +324,7 @@ public class ProvenanceAPI
                         policy += policyJSONs;
                         String ret  = "";
                         if (profOn == true){	
-                                ret = "{" + policy + "," + payment + "," + "\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + so_stream + source + "}}";
+                                ret = "{" + su_owener + ","+ policy + "," + payment + "," + "\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + so_stream + source + "}}";
                         }
                         else
                         {
