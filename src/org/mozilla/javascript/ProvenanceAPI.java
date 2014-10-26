@@ -308,7 +308,10 @@ public class ProvenanceAPI
                                 {
 					tempR = entry.getValue();
                                         JsonNode currentPolicy = getSourcePolicyJSON(tempR);
-                                        policyJSONs.add(currentPolicy);
+				        if (currentPolicy != null)
+				        {
+                                                policyJSONs.add(currentPolicy);
+				        }
                                 }
                         }
                         // Add SO policy to the policies for the new SU
