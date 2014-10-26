@@ -215,7 +215,7 @@ public class ProvenanceAPI
 		// Generate JSON data
                 String policy = "\"policy\":"; // filed later with the policies of the input SUs
                 String payment = "\"payment\": false";
-
+                String su_owener = "\"owner_id\":" + so_owner;
 		        // Agent
 		        String agent = PROVENANCE_ENTRIY[0] + " : \"SO\",\n";
 		        // Type
@@ -328,7 +328,7 @@ public class ProvenanceAPI
                         }
                         else
                         {
-                                ret = "{" + policy + "," + payment + "}";
+                                ret = "{" + policy + "," + payment + "," + su_owener + "}";
                         }
 		                                
 		return ret;
