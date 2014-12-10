@@ -319,11 +319,20 @@ public class ProvenanceAPI
                         if (soPolicy != null) {
                                 policyJSONs.add(soPolicy);
                         }
+                        String tempSources = sourceJSONs.toString();
+                        tempSources = tempSources.replace("\\", "");
+                        tempSources = tempSources.replace("\"", "\\\"");
+			source += "\"" + tempSources + "\"\n";
 
-			source += sourceJSONs + "\n";
-                        policy += policyJSONs;
+                        //String tempPolicies = policyJSONs.toString();
+                        //tempPolicies = tempPolicies.replace("\"", "\\\"");
+			//policy += "\"" + tempPolicies + "\"\n";
+
+                        policy += soPolicy;//policyJSONs;
                         String ret  = "";
-                        if (profOn == true){	
+                        if (profOn == true){
+                                
+                        
                                 ret = "{" + su_owener + ","+ policy + "," + payment + "," + "\"provenance\" : {" + agent + type + entity + activity + timestamp + accessed + onbehalf + so_stream + source + "}}";
                         }
                         else
@@ -539,6 +548,12 @@ public class ProvenanceAPI
 
 		}
 		returnString += "]";
+
+
+                // -----------------
+
+                returnString = returnString.replace("\"", "\\\"");
+		returnString = "\"" + returnString + "\"\n";
 
 		return returnString;
 	}
