@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 
 /**
@@ -319,14 +320,17 @@ public class ProvenanceAPI
                         if (soPolicy != null) {
                                 policyJSONs.add(soPolicy);
                         }
+
+                        /*                        
                         String tempSources = sourceJSONs.toString();
                         tempSources = tempSources.replace("\\", "");
                         tempSources = tempSources.replace("\"", "\\\"");
-			source += "\"" + tempSources + "\"\n";
+			source += "\"" + tempSources + "\"\n";*/
+                        String tempSources = sourceJSONs.toString();
+		        String results = StringEscapeUtils.escapeEcmaScript(tempSources);
+                        source += "\"" +results + "\"";
 
-                        //String tempPolicies = policyJSONs.toString();
-                        //tempPolicies = tempPolicies.replace("\"", "\\\"");
-			//policy += "\"" + tempPolicies + "\"\n";
+
 
                         policy += soPolicy;//policyJSONs;
                         String ret  = "";
@@ -551,9 +555,9 @@ public class ProvenanceAPI
 
 
                 // -----------------
-
-                returnString = returnString.replace("\"", "\\\"");
-		returnString = "\"" + returnString + "\"\n";
+                String tempSources = returnString.toString();
+		String results = StringEscapeUtils.escapeEcmaScript(tempSources);
+                returnString = "\"" +results + "\"";
 
 		return returnString;
 	}
