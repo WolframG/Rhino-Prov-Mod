@@ -327,6 +327,7 @@ public class ProvenanceAPI
                         tempSources = tempSources.replace("\"", "\\\"");
 			source += "\"" + tempSources + "\"\n";*/
                         String tempSources = sourceJSONs.toString();
+                        tempSources = StringEscapeUtils.unescapeEcmaScript(tempSources);
 		        String results = StringEscapeUtils.escapeEcmaScript(tempSources);
                         source += "\"" +results + "\"";
 
@@ -556,8 +557,9 @@ public class ProvenanceAPI
 
                 // -----------------
                 String tempSources = returnString.toString();
+                tempSources = StringEscapeUtils.unescapeEcmaScript(tempSources);
 		String results = StringEscapeUtils.escapeEcmaScript(tempSources);
-                returnString = "\"" +results + "\"";
+                returnString = "\"" +results    + "\"";
 
 		return returnString;
 	}
