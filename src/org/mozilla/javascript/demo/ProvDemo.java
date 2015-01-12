@@ -46,9 +46,9 @@ package org.mozilla.javascript.demo;
 		// Get provenance information in JSON format
 			System.out.println("There are: " + provList.size() + " provenance elements gathered");
 			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("", provList, mapVarSU));
-			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSONNoTree("", provList, mapVarSU));
-			System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSON("", provList, mapVarSU, "Resulting-SU-ID"));
-			System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSONNoTree("", provList, mapVarSU, "Resulting-SU-ID"));
+			//System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSONNoTree("", provList, mapVarSU));
+			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSON("", provList, mapVarSU, "Resulting-SU-ID"));
+			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSONNoTree("", provList, mapVarSU, "Resulting-SU-ID"));
 		}
 
 	
