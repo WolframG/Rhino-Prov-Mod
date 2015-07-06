@@ -19,13 +19,16 @@ package org.mozilla.javascript.demo;
 			inputVar.put("b", "1");
 			inputVar.put("c", "\"test\"");
 			//inputVar.put(ProvenanceAPI.COMPUTATION, "b = 3; a; a = b + 9; a == b ? c + b : c + a");
-			inputVar.put(ProvenanceAPI.COMPUTATION, "b;JSON.stringify(a)");
+			inputVar.put(ProvenanceAPI.COMPUTATION, "c +b");
 			
 			// Map: Variables and the JSON of the SU where the corresponding current-value and provenance data is
 			Map<String, String> mapVarSU = new HashMap<String, String>();
-			mapVarSU.put("a", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testa\"}}],\"provenance\" : {\"entity\" : \"SU-A-ID\", \"source\" : [\"xx-a\"]} }"); 
-			mapVarSU.put("b", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testb\"}}],\"provenance\" : {\"entity\" : \"SU-B-ID\", \"source\" : [\"xx-b\"]} }"); 
-			mapVarSU.put("c", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testc\"}}],\"provenance\" : {\"entity\" : \"SU-C-ID\", \"source\" : [\"xx-c\"]} }");
+			//mapVarSU.put("a", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testa\"}}],\"provenance\" : {\"entity\" : \"SU-A-ID\", \"source\" : [\"xx-a\"]} }"); 
+			//mapVarSU.put("b", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testb\"}}],\"provenance\" : {\"entity\" : \"SU-B-ID\", \"source\" : [\"xx-b\"]} }"); 
+			//mapVarSU.put("c", "{\"policy\" : [{\"flow\" : {\"target\":\"user/testc\"}}],\"provenance\" : {\"entity\" : \"SU-C-ID\", \"source\" : [\"xx-c\"]} }");
+			mapVarSU.put("a", "{\"policy\" : [{\"object\" : \"a\",\"flows\" : [{\"target\":1},{\"target\":1},{\"source\":1},{\"source\":1}]}]}"); 
+			mapVarSU.put("b", "{\"policy\" : [{\"object\" : \"b\",\"flows\" : [{\"target\":1},{\"source\":1},{\"source\":1}]}]}"); 
+			mapVarSU.put("c", "{\"policy\" : [{\"object\" : \"c\",\"flows\" : [{\"target\":1},{\"target\":1},{\"source\":1},{\"source\":1}]}]}");
 
 
 			// Map: Variables and the JSON of the SU where the corresponding current-value and provenance data is
@@ -35,14 +38,14 @@ package org.mozilla.javascript.demo;
 			String fullComputationString = ProvenanceAPI.buildString(inputVar);
 			System.out.println("Computation String: " + fullComputationString);
 		// Execute String with the modified Rhino version 
-			List<Provelement> provList = (List<Provelement>)ProvenanceAPI.executeSOcode(fullComputationString, "{\"data_provenance_collection\" : false}");
+			List<Provelement> provList = (List<Provelement>)ProvenanceAPI.executeSOcode(fullComputationString, "{\"data_provenance_collection\" : true}");
 		// Get the result value of the computation
 			System.out.println("The result is: " + ProvenanceAPI.getResultValue(provList));
 		// Print gathered data (only for illustration purposes)
 			//printProvList(provList);
 		// Get provenance information in JSON format
 			//System.out.println("There are: " + provList.size() + " provenance elements gathered");
-			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("{\"id\":\"1234\",\"data_provenance_collection\": false,\"owner_id\":\"userid\", \"policy\" : \"so_policy\"}", provList, mapVarSU, "stream1"));
+			System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSON("{\"id\":\"1234\",\"data_provenance_collection\": true,\"owner_id\":\"userid\", \"policy\" : \"so_policy\"}", provList, mapVarSU, "stream1"));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceAPI.buildProvenanceJSONNoTree("", provList, mapVarSU));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSON("", provList, mapVarSU, "Resulting-SU-ID"));
 			//System.out.println("The provenance information for the new SU:\n" + ProvenanceRefAPI.buildProvenanceJSONNoTree("", provList, mapVarSU, "Resulting-SU-ID"));

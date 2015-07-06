@@ -311,8 +311,9 @@ public class ProvenanceAPI
                         source += sourceJSONs;
 
 
-
-                        policy += policyJSONs; //soPolicy;
+                        System.out.println("IIII Merge in: " + policyJSONs);
+                        policy += dummyMergeNew(policyJSONs); //soPolicy;
+                        System.out.println("OOOO Merge out: " + policy);
                         String ret  = "";
                         if (profOn == true){
                                 
@@ -326,6 +327,54 @@ public class ProvenanceAPI
 		                                
 		return ret;
 	}
+
+
+/*
+ * Simple dummy merge works only with public and private policy
+ *
+ */
+private static String dummyMergeNew(ArrayNode policyJSONs){
+        // Goes through all flows and checks if it is private or public
+        Iterator<JsonNode> polIter = policyJSONs.elements();
+        JsonNode tempNode = null;
+        while (polIter.hasNext()){
+                tempNode = polIter.next();
+                System.out.println("Merging: " + tempNode);
+                if (isPrivate(tempNode) == true){
+                        System.out.println("This is private (found in merge): " + tempNode);
+                        break;
+                }
+        }
+        // Only the flows should be returned
+        if (tempNode == null){
+                return null;
+        }
+        if (tempNode.findValue("flows") != null)
+        {
+                return tempNode.findValue("flows").toString();       
+        } else {
+                return tempNode.toString();
+        }
+}
+
+
+/*
+ * Checks if this is the private policy
+ *
+ */
+private static boolean isPrivate(JsonNode currentNode){
+        // Get target and source
+        List<JsonNode> target = currentNode.findValues("target");
+        List<JsonNode> source = currentNode.findValues("source");
+        
+        // Check if lists have right size
+        System.out.println("Size: " + target.size() + " " + source.size()) ;
+        if (target.size() == 2 && source.size() == 2)
+        {
+                return true;
+        }
+        return false;       
+}
 
 
 
@@ -438,7 +487,7 @@ public class ProvenanceAPI
 		        JsonNode data;
 		        data = mapper.readTree(su);
                         provCollection = data.findValue("policy");
-                }catch(Exception e){}
+                }catch(Exception e){return null;}
 		return provCollection;
         }
 	
