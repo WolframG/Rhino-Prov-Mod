@@ -257,9 +257,9 @@ public class ProvenanceAPI
                                                         //JsonNode currentSource = getSourceProvenanceJSON(tempR);      //tree
                                                         
                                                         // ---------------- The four formats ----------------
-                                                        //ArrayNode currentSource  = getSourceArrayProvenanceRefJSONTree(tempR,so_id, time);
+                                                        ArrayNode currentSource  = getSourceArrayProvenanceRefJSONTree(tempR,so_id, time);
                                                         //ArrayNode currentSource  = getSourceArrayProvenanceRefJSON(tempR,so_id, time);
-                                                        ArrayNode currentSource = getSourceArrayProvenanceJSONTree(tempR,so_id, time);// flat tree with all data
+                                                        //ArrayNode currentSource = getSourceArrayProvenanceJSONTree(tempR,so_id, time);// flat tree with all data
                                                         //ArrayNode currentSource = getSourceArrayProvenanceJSON(tempR,so_id, time);
                                                         // ---------------------------------------------------
 
