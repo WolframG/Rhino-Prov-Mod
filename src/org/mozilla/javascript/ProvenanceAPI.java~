@@ -255,8 +255,13 @@ public class ProvenanceAPI
 						        //String tempString = "";
                                                         JsonNode currentPolicy = getSourcePolicyJSON(tempR);
                                                         //JsonNode currentSource = getSourceProvenanceJSON(tempR);      //tree
-                                                        ArrayNode currentSource = getSourceArrayProvenanceJSON(tempR,so_id, time);        // flat tree 
-
+                                                        
+                                                        // ---------------- The four formats ----------------
+                                                        //ArrayNode currentSource  = getSourceArrayProvenanceRefJSONTree(tempR,so_id, time);
+                                                        ArrayNode currentSource  = getSourceArrayProvenanceRefJSON(tempR,so_id, time);
+                                                        //ArrayNode currentSource = getSourceArrayProvenanceJSONTree(tempR,so_id, time);// flat tree with all data
+                                                        //ArrayNode currentSource = getSourceArrayProvenanceJSON(tempR,so_id, time);
+                                                        // ---------------------------------------------------
 
 
     
@@ -311,9 +316,9 @@ public class ProvenanceAPI
                         source += sourceJSONs;
 
 
-                        System.out.println("IIII Merge in: " + policyJSONs);
+                        //System.out.println("IIII Merge in: " + policyJSONs);
                         policy += dummyMergeNew(policyJSONs); //soPolicy;
-                        System.out.println("OOOO Merge out: " + policy);
+                        //System.out.println("OOOO Merge out: " + policy);
                         String ret  = "";
                         if (profOn == true){
                                 
@@ -328,6 +333,106 @@ public class ProvenanceAPI
 		return ret;
 	}
 
+	
+	
+/** 
+ * TreeReference (tree + ref)
+ * @param SU in JSON format 
+ * @return ArrayNode that contains a list of provenance sources 
+ */
+	public static ArrayNode getSourceArrayProvenanceRefJSON(String su, String so_entity, long so_timestamp) 
+	{
+                String returnString = "";
+                ObjectMapper mapperRet = new ObjectMapper();
+                ArrayNode ret = new ArrayNode(mapperRet.getNodeFactory());
+                JsonNode provCollection = null;
+                ObjectNode newEntry = new ObjectNode(mapperRet.getNodeFactory());
+                JsonNode provCollectionSource = null;
+                try{
+                        // Parse SU string to JsonNode
+                        ObjectMapper mapper = new ObjectMapper();
+		        JsonNode data;
+		        data = mapper.readTree(su);
+                        // Get provenance
+                        provCollection = data.findValue("provenance");
+                        
+/*
+                        // Get ID of this SU
+                        JsonNode currentSuId = provCollection.findValue("entity");
+                        // Get time of this SU
+                        JsonNode currentSuTime = provCollection.findValue("timestamp");
+*/
+
+                        // Get data of current SU (remove source, add parent filds)
+                        ((ObjectNode) newEntry).put("parent_entity", so_entity);
+                        ((ObjectNode) newEntry).put("parent_time", so_timestamp);
+                        ((ObjectNode) newEntry).put("entity", provCollection.get("entity"));
+                        ((ObjectNode) newEntry).put("timestamp", provCollection.get("timestamp"));
+                        
+
+                        ret.add((JsonNode)newEntry);
+
+                }catch(Exception e){System.out.println("Error: " + e);}
+		return ret;
+}
+	
+	
+	/** 
+	 * TreeReference (tree + ref)
+	 * @param SU in JSON format 
+	 * @return ArrayNode that contains a list of provenance sources 
+	 */
+		public static ArrayNode getSourceArrayProvenanceRefJSONTree(String su, String so_entity, long so_timestamp) 
+		{
+	                String returnString = "";
+	                ObjectMapper mapperRet = new ObjectMapper();
+	                ArrayNode ret = new ArrayNode(mapperRet.getNodeFactory());
+	                JsonNode provCollection = null;
+	                ObjectNode newEntry = new ObjectNode(mapperRet.getNodeFactory());
+	                JsonNode provCollectionSource = null;
+	                try{
+	                        // Parse SU string to JsonNode
+	                        ObjectMapper mapper = new ObjectMapper();
+			        JsonNode data;
+			        data = mapper.readTree(su);
+	                        // Get provenance
+	                        provCollection = data.findValue("provenance");
+	                        
+	/*
+	                        // Get ID of this SU
+	                        JsonNode currentSuId = provCollection.findValue("entity");
+	                        // Get time of this SU
+	                        JsonNode currentSuTime = provCollection.findValue("timestamp");
+	*/
+	                        
+	                        
+	                        // Ger sources of the this SU    
+	                        provCollectionSource = provCollection.findValue("source"); //findValues
+	                        if (provCollectionSource.isArray() == true){
+	                                 for ( Iterator<JsonNode> iterator = provCollectionSource.iterator(); iterator.hasNext(); ){
+	                                        //ObjectMapper mapperTemp = new ObjectMapper();
+	                                        //ArrayNode tempSource = new ObjectNode(mapperRet.getNodeFactory());                                
+
+	                                        JsonNode tempSource = iterator.next();  
+	                                        //((ObjectNode) tempSource).put("parent_entity", currentSuId);
+	                                        //((ObjectNode) tempSource).put("parent_time", currentSuTime);
+	                                        // Add depth level?
+	                                        ret.add((JsonNode)tempSource);
+	                                 }
+	                        }
+	                        // Get data of current SU (remove source, add parent filds)
+	                        ((ObjectNode) newEntry).put("parent_entity", so_entity);
+	                        ((ObjectNode) newEntry).put("parent_time", so_timestamp);
+	                        ((ObjectNode) newEntry).put("entity", provCollection.get("entity"));
+	                        ((ObjectNode) newEntry).put("timestamp", provCollection.get("timestamp"));
+	                        
+
+	                        ret.add((JsonNode)newEntry);
+
+	                }catch(Exception e){System.out.println("Error: " + e);}
+			return ret;
+	}
+	
 
 /*
  * Simple dummy merge works only with public and private policy
@@ -365,7 +470,7 @@ private static String dummyMergeNew(ArrayNode policyJSONs){
 private static boolean isPrivate(JsonNode currentNode){
         // Get target and source
         List<JsonNode> target = currentNode.findValues("target");
-        List<JsonNode> source = currentNode.findValues("souce");
+        List<JsonNode> source = currentNode.findValues("source");
         
         // Check if lists have right size
         System.out.println("Size: " + target.size() + " " + source.size()) ;
@@ -397,13 +502,13 @@ private static boolean isPrivate(JsonNode currentNode){
 		return provCollection;
         }
 
-
+	
 /** 
- * 
+ * Tree no reference
  * @param SU in JSON format 
  * @return ArrayNode that contains a list of provenance sources 
  */
-	public static ArrayNode getSourceArrayProvenanceJSON(String su, String so_entity, long so_timestamp) 
+	public static ArrayNode getSourceArrayProvenanceJSONTree(String su, String so_entity, long so_timestamp) 
 	{
                 String returnString = "";
                 ObjectMapper mapperRet = new ObjectMapper();
@@ -449,6 +554,48 @@ private static boolean isPrivate(JsonNode currentNode){
                 }catch(Exception e){System.out.println("Error: " + e);}
 		return ret;
         }
+	
+	
+	
+	
+	
+
+/** 
+ * 
+ * @param SU in JSON format 
+ * @return ArrayNode that contains a list of provenance sources 
+ */
+	public static ArrayNode getSourceArrayProvenanceJSON(String su, String so_entity, long so_timestamp) 
+	{
+                String returnString = "";
+                ObjectMapper mapperRet = new ObjectMapper();
+                ArrayNode ret = new ArrayNode(mapperRet.getNodeFactory());
+                JsonNode provCollection = null;  
+                JsonNode provCollectionSource = null;                              
+                try{
+                        // Parse SU string to JsonNode
+                        ObjectMapper mapper = new ObjectMapper();
+		        JsonNode data;
+		        data = mapper.readTree(su);
+                        // Get provenance
+                        provCollection = data.findValue("provenance");
+                        
+/*
+                        // Get ID of this SU
+                        JsonNode currentSuId = provCollection.findValue("entity");
+                        // Get time of this SU
+                        JsonNode currentSuTime = provCollection.findValue("timestamp");
+*/
+
+                        // Get data of current SU (remove source, add parent filds)
+                        ((ObjectNode) provCollection).put("parent_entity", so_entity);
+                        ((ObjectNode) provCollection).put("parent_time", so_timestamp);
+                        ((ObjectNode) provCollection).remove("source");
+                        ret.add((JsonNode)provCollection);
+
+                }catch(Exception e){System.out.println("Error: " + e);}
+		return ret;
+ }
 
 
 
