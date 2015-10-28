@@ -41,6 +41,19 @@ package org.mozilla.javascript.demo;
 			List<Provelement> provList = (List<Provelement>)ProvenanceAPI.executeSOcode(fullComputationString, "{\"data_provenance_collection\" : true}");
 		// Get the result value of the computation
 			System.out.println("The result is: " + ProvenanceAPI.getResultValue(provList));
+//-----------------------
+inputVar.put(ProvenanceAPI.COMPUTATION, "c < b");
+fullComputationString = ProvenanceAPI.buildString(inputVar);
+List<Provelement> provList2 = (List<Provelement>)ProvenanceAPI.executeSOcode(fullComputationString,provList, "{\"data_provenance_collection\" : true}");
+System.out.println("The result is: " + ProvenanceAPI.getResultValue(provList2));
+System.out.println("----------------");
+
+for (Provelement i : provList2){
+	System.out.println("W: " + i.writeVar + " R: " + i.readVars);
+}
+
+System.out.println("----------------");
+//-----------------------
 		// Print gathered data (only for illustration purposes)
 			//printProvList(provList);
 		// Get provenance information in JSON format
