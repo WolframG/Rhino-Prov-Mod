@@ -449,13 +449,14 @@ public abstract class ScriptableObject implements Scriptable, Serializable,
      */
     public Object get(String name, Scriptable start)
     {
+        HashSet<String> tempVarNames = (HashSet<String>)Provenance.varNames.get();
         Slot slot = getSlot(name, 0, SLOT_QUERY);
         if (slot == null) {
             return Scriptable.NOT_FOUND;
         }
         // ------------- 
         //System.out.println("ScriptableObject get: " + name);
-        if (Provenance.varNames.contains(name))
+        if (tempVarNames.contains(name))
         {
                 Provenance.addRead(name);
         }
@@ -500,9 +501,9 @@ public abstract class ScriptableObject implements Scriptable, Serializable,
      */
     public void put(String name, Scriptable start, Object value)
     {
-
+        HashSet<String> tempVarNames = (HashSet<String>)Provenance.varNames.get();
         if (putImpl(name, 0, start, value)){
-        if (Provenance.varNames.contains(name))
+        if (tempVarNames.contains(name))
         {
                 //System.out.println("Write on var: " + name + " value: " + value);//XXX
 }
