@@ -13,9 +13,12 @@ import java.util.*;
  *
  */
 public  class Provenance {
-	static List<Provelement> provEntries = new ArrayList<Provelement>();
-	static Stack<ProvStackElement> funcStack = new Stack<ProvStackElement>();
-	static Set<String> varNames = new HashSet<String>(); // Names of all variables that should be tracked
+        static ThreadLocal provEntries = new ThreadLocal<List<Provelement>>();
+	//static List<Provelement> provEntries = new ArrayList<Provelement>();
+        static ThreadLocal funcStack = new ThreadLocal<Stack<ProvStackElement>>();
+	//static Stack<ProvStackElement> funcStack = new Stack<ProvStackElement>();
+        static ThreadLocal varNames = new ThreadLocal<HashSet<String>>();
+	//static Set<String> varNames = new HashSet<String>(); // Names of all variables that should be tracked
 	
 	
 
@@ -28,17 +31,20 @@ public  class Provenance {
 	public static void addProv(String write, List<String> reads)
 	{
 		Provelement temp = new Provelement(write, reads);
-	
-		provEntries.add(temp);
+	       
+                ArrayList<Provelement> tempProvList = (ArrayList<Provelement>)provEntries.get();
+                tempProvList.add(temp);
+                provEntries.set(tempProvList);
+		///provEntries.add(temp);
 
 	}
 
 
 	public static void init()
 	{
-		provEntries.clear();
-		funcStack.clear();
-		varNames.clear();
+		provEntries.set(new ArrayList<Provelement>());
+		funcStack.set(new Stack<ProvStackElement>());
+		varNames.set(new HashSet<String>());
 	}	
 
         /**
@@ -48,7 +54,10 @@ public  class Provenance {
          */
 	public static void addVarName(String name)
 	{
-		varNames.add(name);
+                HashSet<String> tempVarNames = (HashSet<String>)varNames.get();
+                tempVarNames.add(name);
+                varNames.set(tempVarNames);		
+                ///varNames.add(name);
 	}
 
 
@@ -64,7 +73,10 @@ public  class Provenance {
 			List<String> tempList = new LinkedList<String>();
 			tempList.add(result.toString());
 			Provelement temp = new Provelement("return", tempList);
-			provEntries.add(temp);
+                        ArrayList<Provelement> tempProvList = (ArrayList<Provelement>)provEntries.get();
+                        tempProvList.add(temp);
+                        provEntries.set(tempProvList);			
+                        ///provEntries.add(temp);
 		}
 	}
 
@@ -89,7 +101,10 @@ public  class Provenance {
 		}*/
 		HashSet<String> tempHash = new HashSet<String>();
 		tempHash.add(read);
-		funcStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
+                Stack<ProvStackElement> tempFuncStack = (Stack<ProvStackElement>)funcStack.get();
+                tempFuncStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
+                funcStack.set(tempFuncStack);
+		//funcStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
 	}
 
 
@@ -100,22 +115,26 @@ public  class Provenance {
 	 */
 	public static List<Provelement> getReturnValue()
 	{
-		return provEntries;
+		return (ArrayList<Provelement>)provEntries.get();
 	}
  
 
 	public static void addBeginFunction(String idCall)
 	{
-		funcStack.push(new ProvStackElement(idCall, ProvStackElement.StackType.FUNC));
+                Stack<ProvStackElement> tempFuncStack = (Stack<ProvStackElement>)funcStack.get();
+                tempFuncStack.push(new ProvStackElement(idCall, ProvStackElement.StackType.FUNC));
+                funcStack.set(tempFuncStack);
+		///funcStack.push(new ProvStackElement(idCall, ProvStackElement.StackType.FUNC));
 	}
 
 	public static void addEndFunctionOld(String idCall, String name)
-	{		
+	{	
+                Stack<ProvStackElement> tempFuncStack = (Stack<ProvStackElement>)funcStack.get();
 		String activity = "";		
 		List<ProvStackElement> tempElements = new LinkedList<ProvStackElement>();
-		while (funcStack.empty() == false)
+		while (tempFuncStack.empty() == false)
 		{	
-			ProvStackElement lastElement = funcStack.pop();
+			ProvStackElement lastElement = tempFuncStack.pop();
 			if (lastElement.type == ProvStackElement.StackType.VAR)
 			{
 				// Store them in a list to output them and to add them again if the list is not empty for nested functions
@@ -133,23 +152,28 @@ public  class Provenance {
 			for(ProvStackElement tempElement : tempElements)
 			{
 				tempList.add(tempElement.value);
-				if (funcStack.empty() == false)
+				if (tempFuncStack.empty() == false)
 				{
-					funcStack.push(tempElement);
+					tempFuncStack.push(tempElement);
 				}
 			}
 			Provelement temp = new Provelement("", tempList, activity);
-			provEntries.add(temp);
+                        ArrayList<Provelement> tempProvList = (ArrayList<Provelement>)provEntries.get();
+                        tempProvList.add(temp);
+                        provEntries.set(tempProvList);			
+                        ///provEntries.add(temp);
 		}
+                funcStack.set(tempFuncStack);
 	}
 
 	public static void addEndInfixFunction(String name)
 	{
+                Stack<ProvStackElement> tempFuncStack = (Stack<ProvStackElement>)funcStack.get();
 		List<ProvStackElement> tempElements = new LinkedList<ProvStackElement>();
 		// Get last two variables
-		while((tempElements.size() < 2) && (funcStack.empty() == false))
+		while((tempElements.size() < 2) && (tempFuncStack.empty() == false))
 		{
-			ProvStackElement lastElement = funcStack.pop();
+			ProvStackElement lastElement = tempFuncStack.pop();
 			if (ProvStackElement.StackType.VAR == lastElement.type)
 			{		
 				tempElements.add(lastElement);
@@ -165,22 +189,27 @@ public  class Provenance {
 			}
 		}
 		// Add compined variable to the funcStack
-		funcStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
+		tempFuncStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
 		// Generate Provelement
 		LinkedList<String> tempList = new LinkedList<String>();
 		tempList.addAll(tempHash);
 		Provelement temp = new Provelement("", tempList, "\"" + name + "\"");
-		provEntries.add(temp);
+		ArrayList<Provelement> tempProvList = (ArrayList<Provelement>)provEntries.get();
+                tempProvList.add(temp);
+                provEntries.set(tempProvList);
+                ///provEntries.add(temp);
+                funcStack.set(tempFuncStack);
 	}
 
 	public static void addEndFunction(String idCall, String name)
 	{		
+                Stack<ProvStackElement> tempFuncStack = (Stack<ProvStackElement>)funcStack.get();
 		String activity = "";		
 		List<ProvStackElement> tempElements = new LinkedList<ProvStackElement>();
 		// Get all parameters for the function call
-		while (funcStack.empty() == false)
+		while (tempFuncStack.empty() == false)
 		{	
-			ProvStackElement lastElement = funcStack.pop();
+			ProvStackElement lastElement = tempFuncStack.pop();
 			if (lastElement.type == ProvStackElement.StackType.VAR)
 			{
 				// Store them in a list to output them and to add them again
@@ -202,24 +231,29 @@ public  class Provenance {
 			}
 		}
 		// Add consumed variables to the stack again
-		funcStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
+		tempFuncStack.push(new ProvStackElement(tempHash, ProvStackElement.StackType.VAR));
 		// Add provelement if function beginning was found
 		if (activity.equals("") == false) // avoids empty provenance entries
 		{
 			LinkedList<String> tempList = new LinkedList<String>();
 			tempList.addAll(tempHash);
 			Provelement temp = new Provelement("", tempList, activity);
-			provEntries.add(temp);
+                        ArrayList<Provelement> tempProvList = (ArrayList<Provelement>)provEntries.get();
+                        tempProvList.add(temp);
+                        provEntries.set(tempProvList);			
+                        ///provEntries.add(temp);
 		}
+                funcStack.set(tempFuncStack);
 	}
 
 	public static void endProgram()
 	{
+                Stack<ProvStackElement> tempFuncStack = (Stack<ProvStackElement>)funcStack.get();
 		//Add remaining reads from the funcStack
 		LinkedList<String> tempList = new LinkedList<String>();
-		while (funcStack.empty() == false)
+		while (tempFuncStack.empty() == false)
 		{	
-			ProvStackElement lastElement = funcStack.pop();
+			ProvStackElement lastElement = tempFuncStack.pop();
 			if (lastElement.type == ProvStackElement.StackType.VAR)
 			{
 				// Store them in a list to output them and to add them again
@@ -228,7 +262,11 @@ public  class Provenance {
 		}
 
 		Provelement temp = new Provelement("", tempList, "");
-		provEntries.add(temp);
+                ArrayList<Provelement> tempProvList = (ArrayList<Provelement>)provEntries.get();
+                tempProvList.add(temp);
+                provEntries.set(tempProvList);		
+                ///provEntries.add(temp);
+                funcStack.set(tempFuncStack);
 		
 	}
 
