@@ -10,6 +10,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -19,6 +29,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import org.apache.commons.lang3.StringEscapeUtils;
+
+
+
 
 
 /**
@@ -31,7 +44,67 @@ public class PolicyMerge
   private ScriptEngineManager manager = new ScriptEngineManager();
   private ScriptEngine engine = manager.getEngineByName("JavaScript");
 
+  private static String getStringFromInputStream(InputStream is) {
+
+		if (is == null){
+			System.out.println("Empty inout stream");
+			return "";
+		}
+
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+
+		String line;
+		try {
+
+			br = new BufferedReader(new InputStreamReader(is));
+			while ((line = br.readLine()) != null) {
+				sb.append("\n" + line);
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return sb.toString();
+
+	}
+
   public PolicyMerge() {
+  String currentJsCode = "";
+  String fileList[] = {"Flow.js", "system.js", "PolicyConfig.js", "PolicySet.js", "Policy.js", "ContractFlow.js", "Lock.js", "LockContext.js", "Context.js", "Entity.js", "Contract.js", "Locks/TimePeriodLock.js", "Locks/Closed.js", "Locks/IsEqLock.js", "Locks/Open.js", "Locks/IsEq.js", "Locks/GroupLock.js", "Locks/HasIDLock.js", "Locks/UserLock.js", "Locks/IsLtLock.js", "Locks/ActsForLock.js","postLoadInit.js"};
+  String path = "/js/de/passau/uni/sec/compose/Policy/";
+
+  for (int i = 0; i < fileList.length; i++){
+    System.out.println("jar " + path + fileList[i]);
+    InputStream resource = PolicyMerge.class.getResourceAsStream(path + fileList[i]);
+    currentJsCode = getStringFromInputStream(resource);
+    try {
+      engine.eval(currentJsCode);
+      currentJsCode = "";
+    } catch (Exception eJS) {
+      currentJsCode = "";
+      System.out.println("PDP-JS: " + eJS);
+      error = true;
+    }
+  }
+
+}
+
+
+
+
+
+
+  public void PolicyMergeNoJar() {
     error = false;
 
     // Load files
