@@ -214,7 +214,11 @@ public class PolicyMerge
     System.out.println("Java Pol Array: " + soPol.toString());
     // Generate analysis code
     code += "entDes = new Entity(" + entity + ");";
-		code += "pSet = new PolicySet(" + soPol.toString() +");";
+    
+    code += "var poTemp = "+ soPol.toString() + ";";
+    code += "for (var i = 0; i < poTemp.length; i++){if(poTemp[i].hasOwnProperty(\"object\")){ poTemp[i].object.type = poTemp[i].object.type.toLowerCase();}} ;";
+    code += "pSet = new PolicySet(poTemp);";
+
 		//code += "print(\"Entity \"+JSON.stringify(entDes));";
     //code += "print(\"PolicySet \"+JSON.stringify(pSet));";
 		code += "pSO = pSet.getBestMatchPolicy(entDes);";
